@@ -35,7 +35,7 @@ IF(EXISTS ${OPENPOSE_DIR})
 
   add_library(openpose_wrapper src/openpose_wrapper.cpp)
 
-  target_link_libraries(openpose_wrapper 
+  target_link_libraries(openpose_wrapper
     ${CAFFE_LINK_LIBRARY}
     ${OPENPOSE_LINK_LIBRARY}
     ${catkin_LIBRARIES}

@@ -2,12 +2,12 @@
 
 #include <image_recognition_msgs/Recognize.h>
 #include <ros/node_handle.h>
-
+#include <openpose/headers.hpp>
 #include <opencv2/opencv.hpp>
 
 std::shared_ptr<OpenposeWrapper> g_openpose_wrapper;
 std::string g_save_images_folder = "";
-bool g_publish_to_topic = false;
+bool g_publish_to_topic = true;
 ros::Publisher g_pub;
 
 //!
@@ -141,16 +141,16 @@ int main(int argc, char** argv)
   }
   g_publish_to_topic = getParam(local_nh, "publish_result", true);
 
-  cv::Size net_input_size = cv::Size(getParam(local_nh, "net_input_width", 656), getParam(local_nh, "net_input_height", 368));
-  cv::Size net_output_size = cv::Size(getParam(local_nh, "net_output_width", 656), getParam(local_nh, "net_output_height", 368));
+  op::Point<int> netInputSize = op::Point<int>(getParam(local_nh, "net_input_width", 656), getParam(local_nh, "net_input_height", 368));
+  op::Point<int> outputSize = op::Point<int>(getParam(local_nh, "net_output_width", 656), getParam(local_nh, "net_output_height", 368));
 
   ros::Time start = ros::Time::now();
   g_openpose_wrapper = std::shared_ptr<OpenposeWrapper>(
-        new OpenposeWrapper(net_input_size, net_output_size,
+        new OpenposeWrapper(netInputSize, outputSize,
                             getParam(local_nh, "num_scales", 1),
                             getParam(local_nh, "scale_gap", 0.3),
                             getParam(local_nh, "num_gpu_start", 0),
-                            getParam(local_nh, "model_folder", std::string("~/openpose/models/")),
+                            getParam(local_nh, "model_folder", std::string("~/git/openpose/models/")),
                             getParam(local_nh, "pose_model", std::string("COCO")),
                             getParam(local_nh, "overlay_alpha", 0.6)));
   ROS_INFO("OpenposeWrapper initialization took %.3f seconds", (ros::Time::now() - start).toSec());
