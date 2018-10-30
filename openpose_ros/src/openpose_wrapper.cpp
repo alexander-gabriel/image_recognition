@@ -92,6 +92,34 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
 
   }
 
+
+  bool OpenposeWrapper::visualizePose(const cv::Mat& inputImage, Array<float> poseKeypoints, cv::Mat& outputImage) {
+
+    const op::Point<int> imageSize{inputImage.cols, inputImage.rows};
+    ROS_INFO("Step 2");
+    // Step 2 - Get desired scale sizes
+    std::vector<double> scaleInputToNetInputs;
+    std::vector<op::Point<int>> netInputSizes;
+    double scaleInputToOutput;
+    op::Point<int> outputResolution;
+    std::tie(scaleInputToNetInputs, netInputSizes, scaleInputToOutput, outputResolution)
+    = scaleAndSizeExtractor.extract(imageSize);
+    const auto scaleNetToOutput = poseExtractorPtr->getScaleNetToOutput();
+
+    auto outputArray = cvMatToOpOutput.createArray(inputImage, scaleInputToOutput, outputResolution);
+    // Step 5 - Render pose
+    poseGpuRenderer->renderPose(outputArray, poseKeypoints, scaleInputToOutput, scaleNetToOutput);
+    // Step 6 - OpenPose output format to cv::Mat
+    outputImage = opOutputToCvMat.formatToCvMat(outputArray);
+
+    // Calculate the factors between the input image and the output image
+    double width_factor = (double) inputImage.cols / outputImage.cols;
+    double height_factor = (double) inputImage.rows / outputImage.rows;
+    double scale_factor = std::fmax(width_factor, height_factor);
+
+    recognitions.resize(num_people * num_bodyparts);
+  }
+
   bool OpenposeWrapper::detectPoses(const cv::Mat& inputImage, std::vector<image_recognition_msgs::Recognition>& recognitions, cv::Mat& outputImage)
   {
     ROS_INFO("OpenposeWrapper::detectPoses: Detecting poses on image of size [%d x %d]", inputImage.cols, inputImage.rows);
