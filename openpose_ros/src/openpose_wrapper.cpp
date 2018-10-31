@@ -15,7 +15,7 @@ DEFINE_double(render_threshold,         0.05,           "Only estimated keypoint
 " rendered. Generally, a high threshold (> 0.5) will only render very clear body parts;"
 " while small thresholds (~0.1) will also output guessed and occluded keypoints, but also"
 " more false positives (i.e. wrong detections).");
-DEFINE_int32(part_to_show,              19,             "Prediction channel to visualize (default: 0). 0 for all the body parts, 1-18 for each body"
+DEFINE_int32(part_to_show,              0,             "Prediction channel to visualize (default: 0). 0 for all the body parts, 1-18 for each body"
 " part heat map, 19 for the background heat map, 20 for all the body part heat maps"
 " together, 21 for all the PAFs, 22-40 for each body part pair PAF.");
 DEFINE_bool(heatmaps_add_parts,         false,          "If true, it will fill op::Datum::poseHeatMaps array with the body part heatmaps, and"
@@ -37,9 +37,9 @@ DEFINE_bool(part_candidates,            false,          "Also enable `write_json
 " assembled into people). The empty body parts are filled with 0s. Program speed will"
 " slightly decrease. Not required for OpenPose, enable it only if you intend to explicitly"
 " use this information.");
-DEFINE_string(model_pose,               "BODY_25",      "Model to be used. E.g. `COCO` (18 keypoints), `MPI` (15 keypoints, ~10% faster), "
+DEFINE_string(model_pose,               "COCO",      "Model to be used. E.g. `COCO` (18 keypoints), `MPI` (15 keypoints, ~10% faster), "
 "`MPI_4_layers` (15 keypoints, even faster but less accurate).");
-DEFINE_string(model_folder,             "models/",      "Folder path (absolute or relative) where the models (pose, face, ...) are located.");
+DEFINE_string(model_folder,             "/home/alex/git/openpose/models/",      "Folder path (absolute or relative) where the models (pose, face, ...) are located.");
 DEFINE_int32(num_gpu_start,             0,              "GPU device start number.");
 DEFINE_string(output_resolution,        "-1x-1",        "The image resolution (display and output). Use \"-1x-1\" to force the program to use the"
 " input image resolution.");
@@ -72,14 +72,14 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
     // Step 3 - Initialize all required classes
 
 
-    poseExtractorPtr = std::make_shared<op::PoseExtractorCaffe>(poseModel, model_folder, num_gpu_start);
-    op::PoseGpuRenderer poseGpuRenderer{poseModel, poseExtractorPtr, (float)FLAGS_render_threshold, !FLAGS_disable_blending, (float)alpha_pose, (float)FLAGS_alpha_heatmap};
-    poseGpuRenderer.setElementToRender(FLAGS_part_to_show);
+    poseExtractorPtr = std::make_shared<op::PoseExtractorCaffe>(poseModel, model_folder, 0);
+    poseGpuRenderer = std::shared_ptr<op::PoseGpuRenderer>(new op::PoseGpuRenderer{poseModel, poseExtractorPtr, (float)FLAGS_render_threshold, !FLAGS_disable_blending, (float)alpha_pose, (float)FLAGS_alpha_heatmap});
+    poseGpuRenderer->setElementToRender(FLAGS_part_to_show);
 
     op::FrameDisplayer frameDisplayer{"OpenPose Tutorial - Example 2", outputSize};
     // Step 4 - Initialize resources on desired thread (in this case single thread, i.e. we init resources here)
     poseExtractorPtr->initializationOnThread();
-    poseGpuRenderer.initializationOnThread();
+    poseGpuRenderer->initializationOnThread();
     // const auto heatMapTypes = op::flagsToHeatMaps(FLAGS_heatmaps_add_parts, FLAGS_heatmaps_add_bkg, FLAGS_heatmaps_add_PAFs);
     // const auto heatMapScale = op::flagsToHeatMapScaleMode(FLAGS_heatmaps_scale);
     //
@@ -97,7 +97,6 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
     ROS_INFO("OpenposeWrapper::detectPoses: Detecting poses on image of size [%d x %d]", inputImage.cols, inputImage.rows);
 
     const op::Point<int> imageSize{inputImage.cols, inputImage.rows};
-    ROS_INFO("Step 2");
     // Step 2 - Get desired scale sizes
     std::vector<double> scaleInputToNetInputs;
     std::vector<op::Point<int>> netInputSizes;
@@ -105,13 +104,20 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
     op::Point<int> outputResolution;
     std::tie(scaleInputToNetInputs, netInputSizes, scaleInputToOutput, outputResolution)
     = scaleAndSizeExtractor.extract(imageSize);
-    ROS_INFO("Step 3");
     // Step 3 - Format input image to OpenPose input and output formats
     const auto netInputArray = cvMatToOpInput.createArray(inputImage, scaleInputToNetInputs, netInputSizes);
-    ROS_INFO("Step 3.5");
     auto outputArray = cvMatToOpOutput.createArray(inputImage, scaleInputToOutput, outputResolution);
-    ROS_INFO("Step 4");
     // Step 4 - Estimate poseKeypoints
+
+    //EXTRA
+    // op::PoseExtractorCaffe poseExtractorCaffe{poseModel, "/home/alex/git/openpose/models/", 0};
+    // op::PoseCpuRenderer poseRenderer{poseModel, (float)0.05, true, (float)0.6};
+    // poseExtractorCaffe.initializationOnThread();
+    // poseRenderer.initializationOnThread();
+    // poseExtractorCaffe.forwardPass(netInputArray, imageSize, scaleInputToNetInputs);
+    // const auto poseKeypoints = poseExtractorCaffe.getPoseKeypoints();
+    //EXTRA
+
     poseExtractorPtr->forwardPass(netInputArray, imageSize, scaleInputToNetInputs);
     const auto poseKeypoints = poseExtractorPtr->getPoseKeypoints();
     const auto scaleNetToOutput = poseExtractorPtr->getScaleNetToOutput();
@@ -120,15 +126,14 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
     size_t num_bodyparts = poseKeypoints.getSize(1);
     ROS_INFO("OpenposeWrapper::detectPoses: Rendering %d keypoints", (int) (num_people * num_bodyparts));
     // Step 5 - Render pose
+    //TODO: this segfaults for whatever reason..memory?
     poseGpuRenderer->renderPose(outputArray, poseKeypoints, scaleInputToOutput, scaleNetToOutput);
     // Step 6 - OpenPose output format to cv::Mat
     outputImage = opOutputToCvMat.formatToCvMat(outputArray);
-
     // Calculate the factors between the input image and the output image
     double width_factor = (double) inputImage.cols / outputImage.cols;
     double height_factor = (double) inputImage.rows / outputImage.rows;
     double scale_factor = std::fmax(width_factor, height_factor);
-
     recognitions.resize(num_people * num_bodyparts);
 
     ROS_INFO("OpenposeWrapper::detectPoses: Detected %d persons", (int) num_people);

@@ -26,7 +26,7 @@ int openPoseTutorialPose1()
     op::ScaleAndSizeExtractor scaleAndSizeExtractor(netInputSize, outputSize, 1, 0.3);
     op::CvMatToOpInput cvMatToOpInput{poseModel};
     op::CvMatToOpOutput cvMatToOpOutput;
-    op::PoseExtractorCaffe poseExtractorCaffe{poseModel, "/home/ubuntu/openpose/models/", 0};
+    op::PoseExtractorCaffe poseExtractorCaffe{poseModel, "/home/alex/git/openpose/models/", 0};
     op::PoseCpuRenderer poseRenderer{poseModel, (float)0.05, true,
                                          (float)0.6};
     op::OpOutputToCvMat opOutputToCvMat;
@@ -38,7 +38,7 @@ int openPoseTutorialPose1()
 
     // ------------------------- POSE ESTIMATION AND RENDERING -------------------------
     // Step 1 - Read and load image, error if empty (possibly wrong path)
-    cv::Mat inputImage = op::loadImage("/home/ubuntu/openpose/examples/media/COCO_val2014_000000000192.jpg", CV_LOAD_IMAGE_COLOR); // Alternative: cv::imread(FLAGS_image_path, CV_LOAD_IMAGE_COLOR);
+    cv::Mat inputImage = op::loadImage("/home/alex/git/openpose/examples/media/COCO_val2014_000000000192.jpg", CV_LOAD_IMAGE_COLOR); // Alternative: cv::imread(FLAGS_image_path, CV_LOAD_IMAGE_COLOR);
     const op::Point<int> imageSize{inputImage.cols, inputImage.rows};
     // Step 2 - Format input image to OpenPose input and output formats
     std::vector<double> scaleInputToNetInputs;

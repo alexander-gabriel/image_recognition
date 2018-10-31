@@ -13,7 +13,5 @@
   <depend>roscpp</depend>
   <depend>cv_bridge</depend>
   <depend>image_recognition_msgs</depend>
-
-  <!--<depend>libopencv-dev</depend>-->
-
+  
 </package>

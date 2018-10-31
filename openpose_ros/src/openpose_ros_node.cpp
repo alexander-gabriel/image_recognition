@@ -150,7 +150,7 @@ int main(int argc, char** argv)
                             getParam(local_nh, "num_scales", 1),
                             getParam(local_nh, "scale_gap", 0.3),
                             getParam(local_nh, "num_gpu_start", 0),
-                            getParam(local_nh, "model_folder", std::string("~/git/openpose/models/")),
+                            getParam(local_nh, "model_folder", std::string("/home/alex/git/openpose/models/")),
                             getParam(local_nh, "pose_model", std::string("COCO")),
                             getParam(local_nh, "overlay_alpha", 0.6)));
   ROS_INFO("OpenposeWrapper initialization took %.3f seconds", (ros::Time::now() - start).toSec());
