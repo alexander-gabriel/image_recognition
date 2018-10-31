@@ -56,7 +56,7 @@ std::string getTimeAsString(std::string format_string)
 }
 
 
-bool visualizePoses(const cv::Mat& image, Array<float> poseKeypoints)
+bool visualizePose(const cv::Mat& image, op::Array<float> poseKeypoints)
 {
   cv::Mat overlayed_image;
 
@@ -139,7 +139,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
 bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, image_recognition_msgs::Recognize::Response& res)
 {
   ROS_INFO("visualizePoseCallback");
-  Array<float> poseKeypoints
+  op::Array<float> poseKeypoints;
 
   // Convert ROS message to opencv image
   cv_bridge::CvImagePtr cv_ptr;
@@ -162,14 +162,14 @@ bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, imag
   double width_factor = (double) image.cols / image.cols;
   double height_factor = (double) image.rows / image.rows;
   double scale_factor = std::fmax(width_factor, height_factor);
-  for (index=0; index < poseKeypoints.size(); index++)
+  for (int index=0; index < res.recognitions.size(); index++)
   {
-    poseKeypoints[3 * index] = recognitions[index].roi.x_offset / scale_factor;
-    poseKeypoints[3 * index + 1] = recognitions[index].roi.y_offset / scale_factor;
-    poseKeypoints[3 * index + 2] = recognitions[index].categorical_distribution.probabilities.front().probability;
+    poseKeypoints[3 * index] = res.recognitions[index].roi.x_offset / scale_factor;
+    poseKeypoints[3 * index + 1] = res.recognitions[index].roi.y_offset / scale_factor;
+    poseKeypoints[3 * index + 2] = res.recognitions[index].categorical_distribution.probabilities.front().probability;
   }
 
-  return visualizePose(image, keyPoints);
+  return visualizePose(image, poseKeypoints);
 
 }
 

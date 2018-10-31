@@ -31,6 +31,7 @@ public:
                   const std::string& poseModel_, double alpha_pose);
 
   bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recognition>& recognitions, cv::Mat& overlayed_image);
+  bool visualizePose(const cv::Mat& inputImage, op::Array<float> poseKeypoints, cv::Mat& outputImage);
 
 private:
   std::shared_ptr<op::PoseGpuRenderer> poseGpuRenderer;
