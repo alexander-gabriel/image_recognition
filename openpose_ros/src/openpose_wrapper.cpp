@@ -121,7 +121,7 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
 
   bool OpenposeWrapper::detectPoses(const cv::Mat& inputImage, std::vector<image_recognition_msgs::Recognition>& recognitions, cv::Mat& outputImage)
   {
-    ROS_INFO("OpenposeWrapper::detectPoses: Detecting poses on image of size [%d x %d]", inputImage.cols, inputImage.rows);
+    // ROS_INFO("OpenposeWrapper::detectPoses: Detecting poses on image of size [%d x %d]", inputImage.cols, inputImage.rows);
 
     const op::Point<int> imageSize{inputImage.cols, inputImage.rows};
     // Step 2 - Get desired scale sizes
@@ -151,7 +151,7 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
 
     size_t num_people = poseKeypoints.getSize(0);
     size_t num_bodyparts = poseKeypoints.getSize(1);
-    ROS_INFO("OpenposeWrapper::detectPoses: Rendering %d keypoints", (int) (num_people * num_bodyparts));
+    // ROS_INFO("OpenposeWrapper::detectPoses: Rendering %d keypoints", (int) (num_people * num_bodyparts));
     // Step 5 - Render pose
     //TODO: this segfaults for whatever reason..memory?
     poseGpuRenderer->renderPose(outputArray, poseKeypoints, scaleInputToOutput, scaleNetToOutput);
@@ -163,7 +163,7 @@ OpenposeWrapper::OpenposeWrapper(const op::Point<int>& netInputSize, const op::P
     double scale_factor = std::fmax(width_factor, height_factor);
     recognitions.resize(num_people * num_bodyparts);
 
-    ROS_INFO("OpenposeWrapper::detectPoses: Detected %d persons", (int) num_people);
+    // ROS_INFO("OpenposeWrapper::detectPoses: Detected %d persons", (int) num_people);
 
     for (size_t person_idx = 0; person_idx < num_people; person_idx++)
     {

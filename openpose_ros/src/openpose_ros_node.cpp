@@ -138,7 +138,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
 
 bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, image_recognition_msgs::Recognize::Response& res)
 {
-  ROS_INFO("visualizePoseCallback");
+  // ROS_INFO("visualizePoseCallback");
   op::Array<float> poseKeypoints;
 
   // Convert ROS message to opencv image
@@ -181,7 +181,7 @@ bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, imag
 //!
 bool detectPosesCallback(image_recognition_msgs::Recognize::Request& req, image_recognition_msgs::Recognize::Response& res)
 {
-  ROS_INFO("detectPosesCallback");
+  // ROS_INFO("detectPosesCallback");
 
   // Convert ROS message to opencv image
   cv_bridge::CvImagePtr cv_ptr;
