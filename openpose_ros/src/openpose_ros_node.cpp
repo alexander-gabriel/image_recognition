@@ -138,7 +138,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
 
 bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, image_recognition_msgs::Recognize::Response& res)
 {
-  ROS_INFO("visualizePoseCallback");
+  // ROS_INFO("visualizePoseCallback");
   op::Array<float> poseKeypoints;
 
   // Convert ROS message to opencv image
@@ -181,7 +181,7 @@ bool visualizePoseCallback(image_recognition_msgs::Recognize::Request& req, imag
 //!
 bool detectPosesCallback(image_recognition_msgs::Recognize::Request& req, image_recognition_msgs::Recognize::Response& res)
 {
-  ROS_INFO("detectPosesCallback");
+  // ROS_INFO("detectPosesCallback");
 
   // Convert ROS message to opencv image
   cv_bridge::CvImagePtr cv_ptr;
@@ -225,8 +225,8 @@ int main(int argc, char** argv)
                             getParam(local_nh, "num_scales", 1),
                             getParam(local_nh, "scale_gap", 0.3),
                             getParam(local_nh, "num_gpu_start", 0),
-                            getParam(local_nh, "model_folder", std::string("/home/alex/git/openpose/models/")),
-                            getParam(local_nh, "pose_model", std::string("COCO")),
+                            getParam(local_nh, "model_folder", std::string("/home/rasberry/git/openpose/models/")),
+                            getParam(local_nh, "pose_model", std::string("BODY_25")),
                             getParam(local_nh, "overlay_alpha", 0.6)));
   ROS_INFO("OpenposeWrapper initialization took %.3f seconds", (ros::Time::now() - start).toSec());
 
