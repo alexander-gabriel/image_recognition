@@ -81,7 +81,7 @@ bool visualizePose(const cv::Mat& image, op::Array<float> poseKeypoints)
   {
     try
     {
-      sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", overlayed_image).toImageMsg();
+      sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "rgb8", overlayed_image).toImageMsg();
       g_pub.publish(msg);
     }
     catch (cv_bridge::Exception& e)
@@ -124,7 +124,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
   {
     try
     {
-      sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", overlayed_image).toImageMsg();
+      sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "rgb8", overlayed_image).toImageMsg();
       g_pub.publish(msg);
     }
     catch (cv_bridge::Exception& e)
